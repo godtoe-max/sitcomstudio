@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitcom AI Studios | Multi-Agent Writers' Room & Storyboard Engine</title>
+  <meta name="description" content="An autonomous multi-agent television production studio where AI character agents act out original episodes of any sitcom with live storyboards and screenplay teleprompter.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <!-- Studio Header -->
+  <header class="studio-header">
+    <div class="brand-wrapper">
+      <div class="brand-logo">
+        <span>🎬</span> SITCOM AI STUDIOS
+      </div>
+      <div class="on-air-badge" id="onAirBadge">
+        <div class="on-air-dot"></div>
+        <span>ON AIR</span>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <div class="model-pill">
+        <span>Showrunner:</span> Claude 3.5 Sonnet
+      </div>
+      <div class="model-pill">
+        <span>Cast:</span> GPT-4o
+      </div>
+      <div class="model-pill">
+        <span>Art:</span> Claude Illustrations
+      </div>
+
+      <button class="btn-icon" id="soundToggleBtn" title="Toggle Sound Effects">
+        <span id="soundIcon">🔊</span> <span id="soundLabel">Sound On</span>
+      </button>
+      <button class="btn-icon" id="testSoundBtn" title="Play 90s Bass Slap">
+        🎸 Bass Slap
+      </button>
+      <button class="btn-icon" id="serverConfigBtn" title="Configure Backend Server URL (e.g. when hosted on Netlify)">
+        <span id="serverConfigIcon">🔌</span> <span id="serverConfigLabel">Server</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Control Room / Prompt Pitch Bar -->
+  <section class="control-room">
+    <div class="prompt-bar-card">
+      <div class="show-chips-row">
+        <span class="chips-label">Popular Sitcoms:</span>
+        <button class="show-chip active" data-show="The Office">The Office</button>
+        <button class="show-chip" data-show="Seinfeld">Seinfeld</button>
+        <button class="show-chip" data-show="Friends">Friends</button>
+        <button class="show-chip" data-show="Parks and Recreation">Parks & Rec</button>
+        <button class="show-chip" data-show="Brooklyn Nine-Nine">Brooklyn 99</button>
+        <button class="show-chip" data-show="It's Always Sunny in Philadelphia">Always Sunny</button>
+        <button class="show-chip" data-show="Frasier">Frasier</button>
+        <button class="show-chip" data-show="Custom">Custom Show ✨</button>
+      </div>
+
+      <div class="input-grid">
+        <input type="text" id="showInput" class="input-field" value="The Office" placeholder="Show Name (e.g. The Office, Seinfeld)...">
+        <input type="text" id="promptInput" class="input-field" placeholder="Episode Premise (e.g. Dwight discovers an AI is outselling him and suspects Jim sent it)...">
+        <button id="produceBtn" class="btn-produce">
+          <span>🎬</span> Produce Episode
+        </button>
+        <button id="watchStoryboardBtn" class="btn-watch-storyboard" style="display:none;" title="Listen to the completed episode with character voices and audience reactions">
+          <span>🎧</span> Listen to Table Read
+        </button>
+      </div>
+
+      <div class="guest-picker">
+        <label for="guestInput">🌟 Special guest from ANY era</label>
+        <input id="guestInput" class="input-field" maxlength="120" placeholder="Surprise me — or name someone: Cleopatra, David Bowie, Einstein…">
+        <span>Five regulars + one time-defying guest. The showrunner can call “Cut!” for a retake.</span>
+      </div>
+      <div class="quick-pitch-row">
+        <span>Need inspiration?</span>
+        <button class="quick-pitch-btn" id="randomPitchBtn">🎲 Click for a random comedic pitch</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Studio Floor -->
+  <main class="studio-floor">
+    
+    <!-- Left Column: TV Broadcast, Storyboard Reel & Cast Call Sheet -->
+    <div class="left-broadcast-column">
+      
+      <!-- TV Stage -->
+      <div class="tv-set-card">
+        <div class="tv-bezel-header">
+          <span class="tv-channel-badge" id="tvChannelBadge">CH 04 • LIVE STAGE</span>
+          <div class="tv-episode-title-bar" id="tvEpisodeTitleBar">Ready for Pitch...</div>
+        </div>
+
+        <div class="tv-screen-stage" id="tvScreenStage">
+          <!-- Empty State -->
+          <div class="stage-empty-state" id="stageEmptyState">
+            <div class="stage-empty-icon">📺</div>
+            <div class="stage-empty-title">Sitcom Broadcast Ready</div>
+            <div class="stage-empty-subtitle">Pick a show above and click "Produce Episode" to roll camera!</div>
+          </div>
+
+          <!-- Dynamic Storyboard Image / Vector Display Container -->
+          <div id="activeStoryboardContainer" style="display:none; width:100%; height:100%;"></div>
+
+          <!-- Lower Third Speaker Spotlight -->
+          <div class="tv-lower-third" id="tvLowerThird" style="display: none;">
+            <div class="speaker-spotlight">
+              <div class="speaker-avatar-circle" id="spotlightAvatar">M</div>
+              <div>
+                <div class="speaker-name-badge" id="spotlightName">Michael Scott</div>
+                <div class="speaker-status-tag" id="spotlightStatus">Speaking on set</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Storyboard Reel Filmstrip -->
+        <div class="storyboard-reel-section">
+          <div class="reel-header">
+            <div class="reel-title">Storyboard Reel (Art Director)</div>
+            <span style="font-size: 11px; color: var(--text-dim);" id="storyboardCountText">0 Panels</span>
+          </div>
+          <div class="storyboard-track" id="storyboardTrack">
+            <!-- Populated dynamically with scene thumb cards -->
+            <div class="storyboard-thumb-card">
+              <div class="storyboard-thumb-fallback">Scene 1: Cold Open</div>
+            </div>
+            <div class="storyboard-thumb-card">
+              <div class="storyboard-thumb-fallback">Scene 2: Escalation</div>
+            </div>
+            <div class="storyboard-thumb-card">
+              <div class="storyboard-thumb-fallback">Scene 3: Climax</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cast Call Sheet -->
+        <div class="cast-section">
+          <div class="cast-title">Cast Call Sheet (Autonomous Agents)</div>
+          <div class="cast-grid" id="castGrid">
+            <!-- Populated dynamically -->
+            <div class="cast-card">
+              <div class="cast-name">Character 1</div>
+              <div class="cast-archetype">Awaiting cast...</div>
+            </div>
+            <div class="cast-card">
+              <div class="cast-name">Character 2</div>
+              <div class="cast-archetype">Awaiting cast...</div>
+            </div>
+            <div class="cast-card">
+              <div class="cast-name">Character 3</div>
+              <div class="cast-archetype">Awaiting cast...</div>
+            </div>
+            <div class="cast-card">
+              <div class="cast-name">Character 4</div>
+              <div class="cast-archetype">Awaiting cast...</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Column: Hollywood Screenplay Teleprompter -->
+    <div class="right-script-column">
+      <div class="teleprompter-card">
+        <div class="teleprompter-header">
+          <div class="script-meta-title">
+            <span>📜</span> Production Teleprompter
+            <span class="script-format-pill" id="scriptFormatPill">Table Read</span>
+          </div>
+          <div class="teleprompter-controls">
+            <button class="btn-icon download-script-btn" id="downloadScriptBtn" title="Download formatted Hollywood Screenplay (.txt)">
+              <span>📥</span> Download Script
+            </button>
+            <button class="btn-icon" id="autoScrollToggle" title="Toggle Auto-Scroll">
+              <span id="scrollIcon">📜</span> Auto-Scroll: On
+            </button>
+            <button class="btn-icon" id="clearScriptBtn" title="Clear Screen">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="teleprompter-body" id="teleprompterBody">
+          <div class="script-title-block" id="scriptTitleBlock">
+            <div class="script-show-name" id="scriptShowName">THE AI SITCOM STUDIO</div>
+            <div class="script-episode-title" id="scriptEpisodeTitle">Waiting for Showrunner Pitch...</div>
+            <div class="script-logline" id="scriptLogline">Select any sitcom, enter a premise, and watch multiple autonomous AI agents write, direct, illustrate, and act out the episode in real time.</div>
+          </div>
+
+          <div id="scriptContentArea">
+            <!-- Dialogue blocks will stream here dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Behind The Scenes / Agent Monologue Inspector -->
+  <section class="inspector-drawer">
+    <div class="inspector-card">
+      <div class="inspector-header" id="inspectorHeader">
+        <div class="inspector-title">
+          <span class="inspector-icon">🧠</span>
+          <span>Behind The Scenes: Agent Inner Monologue & Reasoning Inspector</span>
+        </div>
+        <span style="font-size: 12px; color: var(--accent-cyan);" id="inspectorToggleText">Click to Collapse ▲</span>
+      </div>
+
+      <div class="inspector-body" id="inspectorBody">
+        <div class="thought-log-entry">
+          <div class="thought-agent-badge">Showrunner (Claude 3.7 Sonnet):</div>
+          <div class="thought-text">Standing by. Ready to pitch comedy structure, comedic tension, and character dossiers.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fullscreen Animatic Watch Theater Modal -->
+  <div id="watchTheaterModal" class="watch-theater-modal" style="display:none;">
+    <div class="theater-content">
+      <div class="theater-header">
+        <div class="theater-title" id="theaterTitle">EPISODE TABLE READ</div>
+        <button class="theater-close-btn" id="closeTheaterBtn">✕ Exit Theater</button>
+      </div>
+      <div class="theater-screen-frame">
+        <img id="theaterStoryboardImg" src="" alt="Active Scene Storyboard" />
+        <div class="theater-subtitle-banner" id="theaterSubtitleBanner">
+          <div class="theater-avatar" id="theaterAvatar">M</div>
+          <div class="theater-speech-box">
+            <div class="theater-speaker-name" id="theaterSpeakerName">Michael Scott</div>
+            <div class="theater-speech-text" id="theaterSpeechText">"Ready on set..."</div>
+          </div>
+        </div>
+      </div>
+      <div id="theaterAudioStatus" role="status" class="art-status">AI-generated character voices</div>
+      <div id="theaterArtStatus" role="status" class="art-status"></div>
+      <div class="theater-controls">
+        <button class="theater-btn" id="theaterPrevBtn">⏮ Previous Line</button>
+        <button class="theater-btn theater-btn-primary" id="theaterPlayPauseBtn">⏸ Pause</button>
+        <button class="theater-btn" id="theaterNextBtn">⏭ Next Line</button>
+        <label><input id="laughTrackToggle" type="checkbox" checked> Laugh track</label>
+        <span class="theater-progress" id="theaterProgress">Line 1 / 1</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/audio.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
