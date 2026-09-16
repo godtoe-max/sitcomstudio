@@ -28,8 +28,9 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
-
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.mount("/css", StaticFiles(directory=str(STATIC_DIR / "css")), name="css")
+app.mount("/js", StaticFiles(directory=str(STATIC_DIR / "js")), name="js")
 
 openai_client = openai.AsyncOpenAI(api_key=OPENAI_API_KEY, timeout=40, max_retries=0) if OPENAI_API_KEY else None
 

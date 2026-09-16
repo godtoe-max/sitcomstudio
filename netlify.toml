@@ -9,6 +9,13 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
+# Rewrite /static/* requests to root assets (e.g. /static/css/styles.css -> /css/styles.css)
+[[redirects]]
+  from = "/static/*"
+  to = "/:splat"
+  status = 200
+
+# Handle client routing fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
